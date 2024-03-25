@@ -7,15 +7,15 @@ const setAnimationJSON = useEditorStore.getState().setAnimationJSON;
 const setLayers = useEditorStore.getState().setLayers;
 
 export const getFrameRate = (animationData: Animation) => {
-    return animationData?.fr;
+    return Math.round(animationData?.fr) || 0;
 };
 
 export const getFirstFrame = (animationData: Animation) => {
-    return animationData?.ip;
+    return Math.round(animationData?.ip) || 0;
 };
 
 export const getLastFrame = (animationData: Animation) => {
-    return animationData?.op;
+    return Math.round(animationData?.op) || 0;
 };
 
 export const getLayers = (animationData: Animation) => {
@@ -44,27 +44,25 @@ export const extractColors = (
 ) => {
     let colors: any[] = [];
 
-    layers.forEach((v: any, i: any) => {
-        if ("layers" in v) {
-            //layer embededded in layer
-            //todo
-        } else if ("shapes" in v) {
+    layers.forEach((layer: any, index: any) => {
+        if ("shapes" in layer) {
             let shapes = extractColors(
-                v.shapes,
+                layer.shapes,
                 rootLayersName,
                 assetsIndex
-            ).map((val) => {
-                val.layerId = rootLayersName + ":" + i + ":" + assetsIndex;
-                val.layerName = v.nm;
-                return val;
+            ).map((shape) => {
+                shape.layerId =
+                    rootLayersName + ":" + index + ":" + assetsIndex;
+                shape.layerName = layer.nm;
+                return shape;
             });
             colors = colors.concat(shapes);
-        } else if ("it" in v) {
-            let items = findItemPath(v.it).map((val) => {
-                val.shapeId = i;
-                val.shapeName = v.nm;
+        } else if ("it" in layer) {
+            let items = findItemPath(layer.it).map((item) => {
+                item.shapeId = index;
+                item.shapeName = layer.nm;
 
-                return val;
+                return item;
             });
             colors = colors.concat(items);
         }
@@ -176,6 +174,7 @@ const findItemPath = (items: any[]) => {
                     : "Stroke 1";
             if (item.c.a == 0) {
                 const color = toRGBADecimal(item.c.k);
+
                 path.push({
                     type: item.ty,
                     itemName: itemName,
