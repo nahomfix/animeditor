@@ -12,8 +12,6 @@ export const LayersPanel: FC = () => {
     const animationJSON = useEditorStore((state) => state.animationJSON);
 
     const handleOnDragEnd = (result: any) => {
-        console.log(result);
-
         reorderLayers(
             animationJSON as Animation,
             result.destination.index,
@@ -41,7 +39,7 @@ export const LayersPanel: FC = () => {
                             ref={provided.innerRef}
                             {...provided.droppableProps}
                         >
-                            {animationJSON?.layers?.map(
+                            {animationJSON.layers?.map(
                                 (layer: any, index: number) => (
                                     <Draggable
                                         draggableId={`${layer.ind}`}
