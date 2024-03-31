@@ -3,6 +3,7 @@ import Tab from "@mui/material/Tab";
 import Tabs from "@mui/material/Tabs";
 import { FC, SyntheticEvent, useState } from "react";
 import { AnimationInformation } from "./AnimationInformation";
+import { AnimationSettings } from "./AnimationSettings";
 import { PropertyInformation } from "./PropertyInformation";
 
 export const PropertiesPanel: FC = () => {
@@ -16,17 +17,22 @@ export const PropertiesPanel: FC = () => {
         <Stack
             width={320}
             sx={{
-                backgroundColor: "#f8f0fb",
+                backgroundColor: "#ffffff",
+                color: "#000000",
+                borderLeft: "1px solid #f3f6f8",
             }}
             px={1}
             py={2}
+            overflow="hidden"
         >
             <Tabs value={value} onChange={handleChange}>
-                <Tab label="Information" sx={{ textTransform: "none" }} />
                 <Tab label="Properties" sx={{ textTransform: "none" }} />
+                <Tab label="Settings" sx={{ textTransform: "none" }} />
+                <Tab label="Information" sx={{ textTransform: "none" }} />
             </Tabs>
-            {value === 0 && <AnimationInformation />}
-            {value === 1 && <PropertyInformation />}
+            {value === 0 && <PropertyInformation />}
+            {value === 1 && <AnimationSettings />}
+            {value === 2 && <AnimationInformation />}
         </Stack>
     );
 };

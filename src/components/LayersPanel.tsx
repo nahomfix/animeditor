@@ -1,79 +1,130 @@
 import { Stack, Typography } from "@mui/material";
-import Accordion from "@mui/material/Accordion";
-import AccordionDetails from "@mui/material/AccordionDetails";
-import AccordionSummary from "@mui/material/AccordionSummary";
 import { FC } from "react";
-import { DragDropContext, Draggable, Droppable } from "react-beautiful-dnd";
+import TreeView, { flattenTree } from "react-accessible-treeview";
+import styled from "styled-components";
 import { useEditorStore } from "../store";
-import { Animation } from "../types";
-import { reorderLayers } from "../utils/editor";
+import { Layer } from "../types";
 
 export const LayersPanel: FC = () => {
     const animationJSON = useEditorStore((state) => state.animationJSON);
+    const selectedLayerId = useEditorStore((state) => state.selectedLayerId);
+    const setSelectedLayerId = useEditorStore(
+        (state) => state.setSelectedLayerId
+    );
 
-    const handleOnDragEnd = (result: any) => {
-        reorderLayers(
-            animationJSON as Animation,
-            result.destination.index,
-            result.source.index
-        );
+    // const handleOnDragEnd = (result: any) => {
+    //     reorderLayers(
+    //         animationJSON as Animation,
+    //         result.destination.index,
+    //         result.source.index
+    //     );
+    // };
+
+    // const items = {
+    //     root: {
+    //         index: "root",
+    //         canMove: true,
+    //         isFolder: true,
+    //         children: ["child1", "child2"],
+    //         data: "Root item",
+    //         canRename: true,
+    //     },
+    //     child1: {
+    //         index: "child1",
+    //         canMove: true,
+    //         isFolder: false,
+    //         children: [],
+    //         data: "Child item 1",
+    //         canRename: true,
+    //     },
+    //     child2: {
+    //         index: "child2",
+    //         canMove: true,
+    //         isFolder: true,
+    //         children: ["child3"],
+    //         data: "Child item 2",
+    //         canRename: true,
+    //     },
+    //     child3: {
+    //         index: "child3",
+    //         children: [],
+    //         data: "Child item 3",
+    //     },
+    // };
+
+    // const dataProvider = useMemo(
+    //     () =>
+    //         new StaticTreeDataProvider(items, (item, data) => ({
+    //             ...item,
+    //             data,
+    //         })),
+    //     [items]
+    // );
+
+    const layers = {
+        name: "",
+        children: animationJSON.layers?.map((layer: Layer) => ({
+            id: layer.ind,
+            name: layer.nm,
+        })),
     };
+
+    const data = flattenTree(layers);
 
     return (
         <Stack
             width={240}
             sx={{
-                backgroundColor: "#363230",
-                color: "#fff",
+                backgroundColor: "#ffffff",
+                color: "#000000",
+                borderRight: "1px solid #f3f6f8",
             }}
             spacing={2}
             px={1}
             py={2}
         >
             <Typography variant="subtitle2">Layers</Typography>
-            <DragDropContext onDragEnd={handleOnDragEnd}>
-                <Droppable droppableId="layers">
-                    {(provided) => (
-                        <Stack
-                            spacing={1}
-                            ref={provided.innerRef}
-                            {...provided.droppableProps}
-                        >
-                            {animationJSON.layers?.map(
-                                (layer: any, index: number) => (
-                                    <Draggable
-                                        draggableId={`${layer.ind}`}
-                                        key={`${layer.ind}`}
-                                        index={index}
-                                    >
-                                        {(provided) => (
-                                            <Accordion
-                                                {...provided.draggableProps}
-                                                {...provided.dragHandleProps}
-                                                ref={provided.innerRef}
-                                            >
-                                                <AccordionSummary>
-                                                    {layer.nm}
-                                                </AccordionSummary>
-                                                <AccordionDetails>
-                                                    {layer.shapes?.map(
-                                                        (shape: any) => (
-                                                            <p key={shape.ind}>
-                                                                {shape.nm}
-                                                            </p>
-                                                        )
-                                                    )}
-                                                </AccordionDetails>
-                                            </Accordion>
-                                        )}
-                                    </Draggable>
-                                )
-                            )}
-                            {provided.placeholder}
-                        </Stack>
-                    )}
-                </Droppable>
-            </DragDropContext>
+            {/* <UncontrolledTreeEnvironment
+                dataProvider={dataProvider}
+                getItemTitle={(item) => item.data}
+                viewState={{}}
+                canDragAndDrop
+                canDropOnFolder
+                canReorderItems
+                disableMultiselect
+            >
+                <Tree treeId="layers" rootItem="root" />
+            </UncontrolledTreeEnvironment> */}
+            <Tree
+                data={data}
+                nodeRenderer={({
+                    element,
+                    getNodeProps,
+                    level,
+                    handleSelect,
+                }) => (
+                    <Branch
+                        {...getNodeProps()}
+                        onClick={() => setSelectedLayerId(Number(element.id))}
+                        selected={element.id === selectedLayerId}
+                    >
+                        {element.name}
+                    </Branch>
+                )}
+            />
         </Stack>
     );
 };
+
+const Tree = styled(TreeView)`
+    list-style: none;
+    padding: 0;
+    margin: 0;
+`;
+
+const Branch = styled.div<{ selected: boolean }>`
+    background-color: ${({ selected }) =>
+        selected ? "#f3f6f8" : "transparent"};
+    padding: 4px 8px;
+    cursor: pointer;
+`;

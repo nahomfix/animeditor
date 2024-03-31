@@ -7,7 +7,7 @@ import TableRow from "@mui/material/TableRow";
 import { FC } from "react";
 import { useEditorStore } from "../store";
 import { Animation } from "../types";
-import { getFirstFrame, getFrameRate, getLastFrame } from "../utils/editor";
+import { getBodymovinVersion, getName } from "../utils/editor";
 
 export const AnimationInformation: FC = () => {
     const animationJSON = useEditorStore((state) => state.animationJSON);
@@ -17,27 +17,21 @@ export const AnimationInformation: FC = () => {
             <Table size="small">
                 <TableHead>
                     <TableRow>
-                        <TableCell>Information</TableCell>
+                        <TableCell>File specification</TableCell>
                         <TableCell></TableCell>
                     </TableRow>
                 </TableHead>
                 <TableBody>
                     <TableRow>
-                        <TableCell>Frame Rate</TableCell>
+                        <TableCell>Bodymovin version</TableCell>
                         <TableCell>
-                            {getFrameRate(animationJSON as Animation)}
+                            {getBodymovinVersion(animationJSON as Animation)}
                         </TableCell>
                     </TableRow>
                     <TableRow>
-                        <TableCell>First Frame</TableCell>
+                        <TableCell>Name</TableCell>
                         <TableCell>
-                            {getFirstFrame(animationJSON as Animation)}
-                        </TableCell>
-                    </TableRow>
-                    <TableRow>
-                        <TableCell>Last Frame</TableCell>
-                        <TableCell>
-                            {getLastFrame(animationJSON as Animation)}
+                            {getName(animationJSON as Animation)}
                         </TableCell>
                     </TableRow>
                 </TableBody>

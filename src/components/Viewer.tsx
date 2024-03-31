@@ -5,25 +5,50 @@ import StopCircleIcon from "@mui/icons-material/StopCircle";
 import UndoIcon from "@mui/icons-material/Undo";
 import { IconButton, Stack } from "@mui/material";
 import { useLottie } from "lottie-react";
-import { FC } from "react";
+import { FC, useEffect } from "react";
 import { useEditorStore } from "../store";
 
 export const Viewer: FC = () => {
     const animationJSON = useEditorStore((state) => state.animationJSON);
+    const undos = useEditorStore((state) => state.undos);
+    const redos = useEditorStore((state) => state.redos);
+    const setFrames = useEditorStore((state) => state.setFrames);
 
-    const { View, play, pause, stop } = useLottie(
-        {
-            animationData: animationJSON,
-            loop: true,
-            autoPlay: true,
-            renderer: "canvas",
-        },
-        {
-            height: "500px",
-            width: "800px",
-            border: "2px dashed lightgrey",
+    const { View, play, pause, stop, animationItem, animationLoaded } =
+        useLottie(
+            {
+                animationData: animationJSON,
+                loop: true,
+                autoPlay: true,
+                renderer: "canvas",
+                rendererSettings: {
+                    className: "lottie-animation-canvas",
+                },
+            },
+            {
+                height: 500,
+                width: 800,
+                border: "2px dashed #f3f6f8",
+            }
+        );
+
+    useEffect(() => {
+        if (animationLoaded) {
+            const frames: string[] = [];
+            const totalFrames = animationItem?.totalFrames ?? 0;
+            const canvas = document.querySelector(
+                ".lottie-animation-canvas"
+            ) as HTMLCanvasElement;
+
+            for (let i = 0; i < totalFrames; i++) {
+                animationItem?.goToAndStop(i, true);
+                const frameImage: string = canvas?.toDataURL();
+                frames.push(frameImage);
+            }
+
+            setFrames(frames);
         }
-    );
+    }, [animationItem, animationLoaded, setFrames]);
 
     return (
         <Stack alignItems="center" p={6}>
@@ -34,7 +59,7 @@ export const Viewer: FC = () => {
                 sx={{
                     mt: 6,
                     alignSelf: "stretch",
-                    backgroundColor: "#f8f0fb",
+                    backgroundColor: "#ffffff",
                 }}
             >
                 <IconButton onClick={() => play()}>
@@ -46,11 +71,17 @@ export const Viewer: FC = () => {
                 <IconButton onClick={() => stop()}>
                     <StopCircleIcon fontSize="large" color="primary" />
                 </IconButton>
-                <IconButton>
-                    <UndoIcon fontSize="large" color="secondary" />
+                <IconButton disabled={undos.length === 0}>
+                    <UndoIcon
+                        fontSize="large"
+                        color={undos.length === 0 ? "disabled" : "secondary"}
+                    />
                 </IconButton>
-                <IconButton>
-                    <RedoIcon fontSize="large" color="secondary" />
+                <IconButton disabled={redos.length === 0}>
+                    <RedoIcon
+                        fontSize="large"
+                        color={redos.length === 0 ? "disabled" : "secondary"}
+                    />
                 </IconButton>
             </Stack>
         </Stack>

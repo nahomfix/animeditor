@@ -8,7 +8,6 @@ export const FilePicker: FC = () => {
 
     useEffect(() => {
         if (acceptedFiles.length !== 0) {
-            console.log(acceptedFiles[0]);
             loadAnimation(acceptedFiles[0]);
         }
     }, [acceptedFiles]);
