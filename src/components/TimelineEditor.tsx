@@ -1,5 +1,6 @@
 import { Timeline, TimelineRow } from "@xzdarcy/react-timeline-editor";
 import { FC, useState } from "react";
+import styled from "styled-components";
 import { useEditorStore } from "../store";
 
 const mockEffects = {
@@ -84,17 +85,49 @@ export const TimelineEditor: FC = () => {
     const [data, setData] = useState(timelineData);
 
     return (
-        <>
+        <Container>
+            <Layers>
+                {data.map((item) => {
+                    return (
+                        <div key={item.id}>
+                            <div className="text">{`Layer ${item.id}`}</div>
+                        </div>
+                    );
+                })}
+            </Layers>
             <Timeline
-                style={{
-                    width: "auto",
-                }}
                 editorData={data}
                 effects={mockEffects}
                 onChange={setData}
                 autoScroll
                 hideCursor={false}
             />
-        </>
+        </Container>
     );
 };
+
+const Container = styled.div`
+    display: flex;
+
+    & .timeline-editor {
+        flex: 1;
+    }
+
+    & .timeline-editor-action {
+        background-color: #3d348b;
+        height: 28px !important;
+        top: 50%;
+        transform: translateY(-50%);
+    }
+`;
+
+const Layers = styled.div`
+    padding-inline: 16px;
+    padding-top: 48px;
+    display: flex;
+    flex-direction: column;
+    gap: 11px;
+    background-color: #26292c;
+    color: #fff;
+    font-size: 14px;
+`;
