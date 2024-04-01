@@ -1,4 +1,4 @@
-import { Stack, Typography } from "@mui/material";
+import { Grid, Stack, Typography } from "@mui/material";
 import hexRgb from "hex-rgb";
 import { FC, useState } from "react";
 import { ChromePicker } from "react-color";
@@ -10,7 +10,6 @@ import { ParsedColor } from "../types/colors";
 import {
     changeAllColor,
     changeColor,
-    extractAllColors,
     getLayerOpacity,
     getLayerPosition,
     getLayerRotation,
@@ -22,8 +21,7 @@ export const PropertyInformation: FC = () => {
     const setAnimationJSON = useEditorStore((state) => state.setAnimationJSON);
     const selectedLayerId = useEditorStore((state) => state.selectedLayerId);
     const colors = useEditorStore((state) => state.colors);
-
-    const uniqueColors = extractAllColors(animationJSON);
+    const uniqueColors = useEditorStore((state) => state.uniqueColors);
 
     const changeOpacity = (opacity: number) => {
         const currentAnimationJSON = {
@@ -32,8 +30,11 @@ export const PropertyInformation: FC = () => {
         const currentLayer = currentAnimationJSON.layers?.find(
             (layer: Layer) => layer.ind === selectedLayerId
         );
-        currentLayer["ks"]["o"]["k"] = opacity;
-        setAnimationJSON(currentAnimationJSON);
+
+        if (currentLayer["ks"]["o"]["a"] === 0) {
+            currentLayer["ks"]["o"]["k"] = opacity;
+            setAnimationJSON(currentAnimationJSON);
+        }
     };
 
     const changeRotation = (rotation: number) => {
@@ -43,8 +44,11 @@ export const PropertyInformation: FC = () => {
         const currentLayer = currentAnimationJSON.layers?.find(
             (layer: Layer) => layer.ind === selectedLayerId
         );
-        currentLayer["ks"]["r"]["k"] = rotation;
-        setAnimationJSON(currentAnimationJSON);
+
+        if (currentLayer["ks"]["r"]["a"] === 0) {
+            currentLayer["ks"]["r"]["k"] = rotation;
+            setAnimationJSON(currentAnimationJSON);
+        }
     };
 
     const changePosition = (position: number[]) => {
@@ -54,8 +58,11 @@ export const PropertyInformation: FC = () => {
         const currentLayer = currentAnimationJSON.layers?.find(
             (layer: Layer) => layer.ind === selectedLayerId
         );
-        currentLayer["ks"]["p"]["k"] = position;
-        setAnimationJSON(currentAnimationJSON);
+
+        if (currentLayer["ks"]["p"]["a"] === 0) {
+            currentLayer["ks"]["p"]["k"] = position;
+            setAnimationJSON(currentAnimationJSON);
+        }
     };
 
     const changeScale = (scale: number[]) => {
@@ -65,38 +72,35 @@ export const PropertyInformation: FC = () => {
         const currentLayer = currentAnimationJSON.layers?.find(
             (layer: Layer) => layer.ind === selectedLayerId
         );
-        currentLayer["ks"]["s"]["k"] = scale;
-        setAnimationJSON(currentAnimationJSON);
+
+        if (currentLayer["ks"]["s"]["a"] === 0) {
+            currentLayer["ks"]["s"]["k"] = scale;
+            setAnimationJSON(currentAnimationJSON);
+        }
     };
 
     return (
         <Stack p={2} spacing={3}>
             <Stack spacing={1}>
                 <Typography variant="subtitle2">Unique Colors</Typography>
-                <Stack
-                    direction="row"
-                    position="relative"
-                    spacing={1}
-                    flexWrap="wrap"
-                >
-                    {uniqueColors.map((color: string, index: number) => (
-                        <UniqueColorPreviewPicker key={index} color={color} />
+                <Grid container position="relative" spacing={1}>
+                    {uniqueColors.map((color: ParsedColor, index: number) => (
+                        <Grid key={index} item>
+                            <ColorPreviewPicker key={index} color={color} />
+                        </Grid>
                     ))}
-                </Stack>
+                </Grid>
             </Stack>
 
             <Stack spacing={1}>
                 <Typography variant="subtitle2">All Colors</Typography>
-                <Stack
-                    direction="row"
-                    position="relative"
-                    spacing={1}
-                    flexWrap="wrap"
-                >
+                <Grid container position="relative" spacing={1}>
                     {colors.map((color: ParsedColor, index: number) => (
-                        <ColorPreviewPicker key={index} color={color} />
+                        <Grid key={index} item>
+                            <ColorPreviewPicker key={index} color={color} />
+                        </Grid>
                     ))}
-                </Stack>
+                </Grid>
             </Stack>
 
             {selectedLayerId && (
@@ -246,6 +250,7 @@ export const PropertyInformation: FC = () => {
 
 const ColorPreviewPicker = ({ color }: { color: ParsedColor }) => {
     const animationJSON = useEditorStore((state) => state.animationJSON);
+    const selectedLayerId = useEditorStore((state) => state.selectedLayerId);
     const [displayColorPicker, setDisplayColorPicker] = useState(false);
     const [pickerColor, setPickerColor] = useState("#ffffff");
 
@@ -271,50 +276,23 @@ const ColorPreviewPicker = ({ color }: { color: ParsedColor }) => {
                         color={pickerColor}
                         onChange={(newColor) => {
                             setPickerColor(newColor.hex);
-                            changeColor(
-                                color.layerIndex,
-                                color.shapeIndex,
-                                color.itemType,
-                                color.itemIndex,
-                                newColor.hex,
-                                animationJSON
-                            );
-                        }}
-                    />
-                </PickerContainer>
-            ) : null}
-        </Container>
-    );
-};
 
-const UniqueColorPreviewPicker = ({ color }: { color: string }) => {
-    const animationJSON = useEditorStore((state) => state.animationJSON);
-    const [displayColorPicker, setDisplayColorPicker] = useState(false);
-    const [pickerColor, setPickerColor] = useState("#ffffff");
-
-    const colorRgba = [
-        hexRgb(color).red,
-        hexRgb(color).green,
-        hexRgb(color).blue,
-        hexRgb(color).alpha,
-    ];
-
-    return (
-        <Container>
-            <ColorPreview
-                color={rgbHex(colorRgba[0], colorRgba[1], colorRgba[2])}
-                onClick={() => setDisplayColorPicker(true)}
-            />
-            {displayColorPicker ? (
-                <PickerContainer>
-                    <PickerWrapper
-                        onClick={() => setDisplayColorPicker(false)}
-                    />
-                    <ChromePicker
-                        color={pickerColor}
-                        onChange={(newColor) => {
-                            setPickerColor(newColor.hex);
-                            changeAllColor(color, newColor.hex, animationJSON);
+                            if (selectedLayerId) {
+                                changeColor(
+                                    color.layerIndex,
+                                    color.shapeIndex,
+                                    color.itemType,
+                                    color.itemIndex,
+                                    newColor.hex,
+                                    animationJSON
+                                );
+                            } else {
+                                changeAllColor(
+                                    color.color,
+                                    newColor.hex,
+                                    animationJSON
+                                );
+                            }
                         }}
                     />
                 </PickerContainer>

@@ -1,8 +1,10 @@
 import { saveAs } from "file-saver";
 import hexRgb from "hex-rgb";
+import { uniqBy } from "lodash";
 import { getColors, replaceColor } from "lottie-colorify";
 import rgbHex from "rgb-hex";
 import { LAYER_TYPE } from "../constants/layers";
+import { SHAPE_TYPE } from "../constants/shapes";
 import { useEditorStore } from "../store";
 import { Animation, Layer } from "../types";
 import { ParsedColor } from "../types/colors";
@@ -11,6 +13,7 @@ import { ParsedColor } from "../types/colors";
 const setAnimationJSON = useEditorStore.getState().setAnimationJSON;
 const setLayers = useEditorStore.getState().setLayers;
 const setColors = useEditorStore.getState().setColors;
+const setUniqueColors = useEditorStore.getState().setUniqueColors;
 const setFrameRate = useEditorStore.getState().setFrameRate;
 const setWidth = useEditorStore.getState().setWidth;
 const setHeight = useEditorStore.getState().setHeight;
@@ -78,7 +81,10 @@ export const extractColors = (layers: any[]) => {
             for (const shape of layer.shapes) {
                 if (shape.it) {
                     for (const item of shape.it) {
-                        if (item.c) {
+                        if (
+                            item.ty === SHAPE_TYPE.FILL ||
+                            item.ty === SHAPE_TYPE.STROKE
+                        ) {
                             if (Array.isArray(item.c.k)) {
                                 if (item.c.k.length === 4) {
                                     let rgba = item.c.k;
@@ -89,7 +95,7 @@ export const extractColors = (layers: any[]) => {
                                         rgba[3]
                                     );
                                     colors.push({
-                                        color: hex,
+                                        color: `#${hex}`,
                                         layerIndex: layer.ind,
                                         shapeIndex: shape.ix,
                                         itemIndex: item.ind,
@@ -103,7 +109,7 @@ export const extractColors = (layers: any[]) => {
                                         rgb[2] * 255
                                     );
                                     colors.push({
-                                        color: hex,
+                                        color: `#${hex}`,
                                         layerIndex: layer.ind,
                                         shapeIndex: shape.ix,
                                         itemIndex: item.ind,
@@ -125,13 +131,194 @@ export const extractColors = (layers: any[]) => {
     return colors;
 };
 
+export const extractUniqueColors = (layers: any[]) => {
+    const colors: ParsedColor[] = [];
+
+    for (const layer of layers) {
+        if (layer.ty === LAYER_TYPE.SHAPE) {
+            for (const shape of layer.shapes) {
+                if (shape.it) {
+                    for (const item of shape.it) {
+                        if (
+                            item.ty === SHAPE_TYPE.FILL ||
+                            item.ty === SHAPE_TYPE.STROKE
+                        ) {
+                            if (Array.isArray(item.c.k)) {
+                                if (item.c.k.length === 4) {
+                                    let rgba = item.c.k;
+                                    let hex = rgbHex(
+                                        rgba[0] * 255,
+                                        rgba[1] * 255,
+                                        rgba[2] * 255,
+                                        rgba[3]
+                                    );
+                                    colors.push({
+                                        color: `#${hex}`,
+                                        layerIndex: layer.ind,
+                                        shapeIndex: shape.ix,
+                                        itemIndex: item.ind,
+                                        itemType: item.ty,
+                                    });
+                                } else if (item.c.k.length === 3) {
+                                    let rgb = item.c.k;
+                                    let hex = rgbHex(
+                                        rgb[0] * 255,
+                                        rgb[1] * 255,
+                                        rgb[2] * 255
+                                    );
+                                    colors.push({
+                                        color: `#${hex}`,
+                                        layerIndex: layer.ind,
+                                        shapeIndex: shape.ix,
+                                        itemIndex: item.ind,
+                                        itemType: item.ty,
+                                    });
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        if (layer.layers) {
+            extractColors(layer.layers);
+        }
+    }
+
+    return uniqBy(colors, "color");
+};
+
+export const extractLayerColors = (layerId: number, animationData: any) => {
+    const layer = animationData.layers?.find(
+        (layer: any) => layer.ind === layerId
+    );
+
+    const colors: ParsedColor[] = [];
+
+    if (layer?.ty === LAYER_TYPE.SHAPE) {
+        for (const shape of layer.shapes) {
+            if (shape.it) {
+                for (const item of shape.it) {
+                    if (
+                        item.ty === SHAPE_TYPE.FILL ||
+                        item.ty === SHAPE_TYPE.STROKE
+                    ) {
+                        if (Array.isArray(item.c.k)) {
+                            if (item.c.k.length === 4) {
+                                let rgba = item.c.k;
+                                let hex = rgbHex(
+                                    rgba[0] * 255,
+                                    rgba[1] * 255,
+                                    rgba[2] * 255,
+                                    rgba[3]
+                                );
+                                colors.push({
+                                    color: hex,
+                                    layerIndex: layer.ind,
+                                    shapeIndex: shape.ix,
+                                    itemIndex: item.ind,
+                                    itemType: item.ty,
+                                });
+                            } else if (item.c.k.length === 3) {
+                                let rgb = item.c.k;
+                                let hex = rgbHex(
+                                    rgb[0] * 255,
+                                    rgb[1] * 255,
+                                    rgb[2] * 255
+                                );
+                                colors.push({
+                                    color: hex,
+                                    layerIndex: layer.ind,
+                                    shapeIndex: shape.ix,
+                                    itemIndex: item.ind,
+                                    itemType: item.ty,
+                                });
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    if (layer.layers) {
+        extractColors(layer.layers);
+    }
+
+    return colors;
+};
+
+export const extractUniqueLayerColors = (
+    layerId: number,
+    animationData: any
+) => {
+    const layer = animationData.layers?.find(
+        (layer: any) => layer.ind === layerId
+    );
+
+    const colors: ParsedColor[] = [];
+
+    if (layer?.ty === LAYER_TYPE.SHAPE) {
+        for (const shape of layer.shapes) {
+            if (shape.it) {
+                for (const item of shape.it) {
+                    if (
+                        item.ty === SHAPE_TYPE.FILL ||
+                        item.ty === SHAPE_TYPE.STROKE
+                    ) {
+                        if (Array.isArray(item.c.k)) {
+                            if (item.c.k.length === 4) {
+                                let rgba = item.c.k;
+                                let hex = rgbHex(
+                                    rgba[0] * 255,
+                                    rgba[1] * 255,
+                                    rgba[2] * 255,
+                                    rgba[3]
+                                );
+                                colors.push({
+                                    color: hex,
+                                    layerIndex: layer.ind,
+                                    shapeIndex: shape.ix,
+                                    itemIndex: item.ind,
+                                    itemType: item.ty,
+                                });
+                            } else if (item.c.k.length === 3) {
+                                let rgb = item.c.k;
+                                let hex = rgbHex(
+                                    rgb[0] * 255,
+                                    rgb[1] * 255,
+                                    rgb[2] * 255
+                                );
+                                colors.push({
+                                    color: hex,
+                                    layerIndex: layer.ind,
+                                    shapeIndex: shape.ix,
+                                    itemIndex: item.ind,
+                                    itemType: item.ty,
+                                });
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    if (layer.layers) {
+        extractColors(layer.layers);
+    }
+
+    return uniqBy(colors, "color");
+};
+
 const removeDuplicateColors = (colors = []) => {
     const cleanColors = new Set(colors.map((color) => JSON.stringify(color)));
     const cleanArr = Array.from(cleanColors).map((color) => JSON.parse(color));
     return cleanArr;
 };
 
-export const extractAllColors = (animationData: Animation) => {
+export const extractUniqueGlobalColors = (animationData: Animation) => {
     const colors: string[] = [];
     const allColors = getColors(animationData);
     const uniqueColors = removeDuplicateColors(allColors);
@@ -139,6 +326,15 @@ export const extractAllColors = (animationData: Animation) => {
         colors.push(
             `#${rgbHex(uniqueColor[0], uniqueColor[1], uniqueColor[2])}`
         );
+    }
+    return colors;
+};
+
+export const extractAllGlobalColors = (animationData: Animation) => {
+    const colors: string[] = [];
+    const allColors = getColors(animationData);
+    for (const color of allColors) {
+        colors.push(`#${rgbHex(color[0], color[1], color[2])}`);
     }
     return colors;
 };
@@ -154,6 +350,9 @@ export const loadAnimation = (file: File) => {
         setHeight(getHeight(newAnimation));
         setDuration(getDuration(newAnimation));
         setColors(extractColors(getLayers(newAnimation) as Layer[]));
+        setUniqueColors(
+            extractUniqueColors(getLayers(newAnimation) as Layer[])
+        );
     };
     reader.readAsText(file);
 };
@@ -292,28 +491,86 @@ export const changeAllColor = (
     const currentAnimationJSON = {
         ...animationJSON,
     };
+
     const updatedAnimationJSON = replaceColor(
-        currentColor,
+        currentColor.slice(0, 7), // remove the alpha channel from hex
         newColor,
         currentAnimationJSON
     );
     setAnimationJSON(updatedAnimationJSON);
     setColors(extractColors(getLayers(updatedAnimationJSON) as Layer[]));
+    setUniqueColors(
+        extractUniqueColors(getLayers(updatedAnimationJSON) as Layer[])
+    );
 };
 
-export const exportFile = () => {
+export const captureFrames = (animationItem: any, callback: any) => {
+    const frames: string[] = [];
+
+    const canvas = document.querySelector(
+        ".lottie-animation-canvas"
+    ) as HTMLCanvasElement;
+
+    for (let i = 0; i < animationItem.totalFrames; i++) {
+        animationItem.goToAndStop(i, true);
+        const dataURL = canvas?.toDataURL();
+        callback(dataURL);
+    }
+
+    return frames;
+};
+
+export const exportFile = (width: number, height: number, frames: string[]) => {
     const htmlTemplate = `
     <!DOCTYPE html>
-    <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Animation File</title>
-    </head>
-    <body>
-        <canvas />
-    </body>
-    </html>
+        <html lang="en">
+            <head>
+                <meta charset="UTF-8" />
+                <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+                <title>Export Test</title>
+            </head>
+            <body>
+                <canvas id="animation-canvas"></canvas>
+
+                <script
+                    src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.1/fabric.min.js"
+                    integrity="sha512-CeIsOAsgJnmevfCi2C7Zsyy6bQKi43utIjdA87Q0ZY84oDqnI0uwfM9+bKiIkI75lUeI00WG/+uJzOmuHlesMA=="
+                    crossorigin="anonymous"
+                    referrerpolicy="no-referrer"
+                ></script>
+                <script>
+                    const frames = ${JSON.stringify(frames)};
+                    const height = ${height};
+                    const width = ${width}; 
+
+                    const canvas = new fabric.Canvas("animation-canvas", {
+                        height: height,
+                        width: width,
+                        selection: false,
+                    });
+
+                    let currentFrameIndex = 0;
+                    const animateFrames = () => {
+                        const frame = frames[currentFrameIndex];
+
+                        fabric.Image.fromURL(frame, (img) => {
+                            img.scaleToHeight(height);
+                            img.scaleToWidth(width);
+                            canvas.clear();
+                            canvas.add(img);
+                            canvas.centerObject(img);
+                            canvas.renderAll();
+                        });
+
+                        currentFrameIndex = (currentFrameIndex + 1) % frames.length;
+
+                        requestAnimationFrame(animateFrames);
+                    };
+
+                    animateFrames();
+                </script>
+            </body>
+        </html>
     `;
 
     const file = new File([htmlTemplate], "Export.html", {

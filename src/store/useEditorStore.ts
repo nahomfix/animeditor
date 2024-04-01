@@ -1,24 +1,33 @@
 import { create } from "zustand";
 
+interface Action {
+    id: string;
+    data: any;
+    timestamp: number;
+}
+
 interface EditorState {
     animationJSON: any | null;
     frameRate: number;
     duration: number;
     width: number;
     height: number;
-    undos: string[];
-    redos: string[];
+    undos: Action[];
+    redos: Action[];
     colors: any[];
+    uniqueColors: any[];
     layers: any[];
     selectedLayerId: number | null;
     frames: string[];
+    animationItem: any;
 }
 
 interface EditorActions {
     setAnimationJSON: (animationJSON: any) => void;
-    setUndos: (undos: string[]) => void;
-    setRedos: (redos: string[]) => void;
+    setUndos: (undos: Action[]) => void;
+    setRedos: (redos: Action[]) => void;
     setColors: (colors: any[]) => void;
+    setUniqueColors: (uniqueColors: any[]) => void;
     setLayers: (layers: any[]) => void;
     setWidth: (width: number) => void;
     setHeight: (height: number) => void;
@@ -26,6 +35,7 @@ interface EditorActions {
     setDuration: (duration: number) => void;
     setSelectedLayerId: (layerId: number) => void;
     setFrames: (frames: string[]) => void;
+    setAnimationItem: (animationItem: any) => void;
 }
 
 export const useEditorStore = create<EditorState & EditorActions>((set) => ({
@@ -37,9 +47,11 @@ export const useEditorStore = create<EditorState & EditorActions>((set) => ({
     undos: [],
     redos: [],
     colors: [],
+    uniqueColors: [],
     layers: [],
     selectedLayerId: null,
     frames: [],
+    animationItem: null,
     setAnimationJSON: (animationJSON) =>
         set({
             animationJSON,
@@ -55,6 +67,10 @@ export const useEditorStore = create<EditorState & EditorActions>((set) => ({
     setColors: (colors) =>
         set({
             colors,
+        }),
+    setUniqueColors: (uniqueColors) =>
+        set({
+            uniqueColors,
         }),
     setLayers: (layers) =>
         set({
@@ -83,5 +99,9 @@ export const useEditorStore = create<EditorState & EditorActions>((set) => ({
     setFrames: (frames: string[]) =>
         set({
             frames,
+        }),
+    setAnimationItem: (animationItem: any) =>
+        set({
+            animationItem,
         }),
 }));

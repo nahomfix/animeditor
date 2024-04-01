@@ -1,6 +1,5 @@
 import { Stack } from "@mui/material";
 import { FC, ReactNode } from "react";
-import { Canvas } from "./Canvas";
 import { LayersPanel } from "./LayersPanel";
 import { Navbar } from "./Navbar";
 import { PropertiesPanel } from "./PropertiesPanel";
@@ -22,7 +21,7 @@ export const Layout: FC<LayoutProps> = ({ children }) => {
                 </Stack>
                 <PropertiesPanel />
             </Stack>
-            <Canvas />
+            {/* <Canvas /> */}
         </Stack>
     );
 };

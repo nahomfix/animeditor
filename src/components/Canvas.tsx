@@ -16,6 +16,8 @@ export const Canvas: FC = () => {
                 selection: true,
             });
 
+            console.log(frames);
+
             let currentFrameIndex = 0;
             const animateFrames = () => {
                 const frame = frames[currentFrameIndex];
@@ -31,7 +33,7 @@ export const Canvas: FC = () => {
 
                 currentFrameIndex = (currentFrameIndex + 1) % frames.length;
 
-                // requestAnimationFrame(animateFrames);
+                requestAnimationFrame(animateFrames);
             };
 
             animateFrames();

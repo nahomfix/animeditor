@@ -23,6 +23,7 @@
         "fabricjs-react": "^1.2.2",
         "file-saver": "^2.0.5",
         "hex-rgb": "^5.0.0",
+        "lodash": "^4.17.21",
         "lottie-colorify": "^0.8.0",
         "lottie-react": "^2.4.0",
         "lottie-web": "^5.12.2",
@@ -65,6 +66,7 @@
     },
     "devDependencies": {
         "@types/fabric": "^5.3.7",
-        "@types/file-saver": "^2.0.7"
+        "@types/file-saver": "^2.0.7",
+        "@types/lodash": "^4.17.0"
     }
 }

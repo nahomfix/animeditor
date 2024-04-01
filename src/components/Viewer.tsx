@@ -12,7 +12,7 @@ export const Viewer: FC = () => {
     const animationJSON = useEditorStore((state) => state.animationJSON);
     const undos = useEditorStore((state) => state.undos);
     const redos = useEditorStore((state) => state.redos);
-    const setFrames = useEditorStore((state) => state.setFrames);
+    const setAnimationItem = useEditorStore((state) => state.setAnimationItem);
 
     const { View, play, pause, stop, animationItem, animationLoaded } =
         useLottie(
@@ -32,23 +32,29 @@ export const Viewer: FC = () => {
             }
         );
 
+    // useEffect(() => {
+    //     if (animationLoaded) {
+    //         const frames: string[] = [];
+    //         const totalFrames = animationItem?.totalFrames ?? 0;
+    //         const canvas = document.querySelector(
+    //             ".lottie-animation-canvas"
+    //         ) as HTMLCanvasElement;
+
+    //         for (let i = 0; i < totalFrames; i++) {
+    //             animationItem?.goToAndStop(i, true);
+    //             const frameImage: string = canvas?.toDataURL();
+    //             frames.push(frameImage);
+    //         }
+
+    //         setFrames(frames);
+    //     }
+    // }, [animationItem, animationLoaded, setFrames]);
+
     useEffect(() => {
         if (animationLoaded) {
-            const frames: string[] = [];
-            const totalFrames = animationItem?.totalFrames ?? 0;
-            const canvas = document.querySelector(
-                ".lottie-animation-canvas"
-            ) as HTMLCanvasElement;
-
-            for (let i = 0; i < totalFrames; i++) {
-                animationItem?.goToAndStop(i, true);
-                const frameImage: string = canvas?.toDataURL();
-                frames.push(frameImage);
-            }
-
-            setFrames(frames);
+            setAnimationItem(animationItem);
         }
-    }, [animationItem, animationLoaded, setFrames]);
+    }, [animationItem, animationLoaded, setAnimationItem]);
 
     return (
         <Stack alignItems="center" p={6}>
