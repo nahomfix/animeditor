@@ -472,15 +472,18 @@ export const changeColor = (
     const currentItem = currentShape.it?.find(
         (item: any) => item.ty === itemType && item.ix === itemIndex
     );
-    console.log({ currentItem });
+
     currentItem["c"]["k"] = [
         hexRgb(color).red / 255,
         hexRgb(color).green / 255,
         hexRgb(color).blue / 255,
         hexRgb(color).alpha,
     ];
+
     setAnimationJSON(currentAnimationJSON);
-    setColors(extractColors(getLayers(currentAnimationJSON) as Layer[]));
+
+    setColors(extractLayerColors(layerIndex, currentAnimationJSON));
+    setUniqueColors(extractUniqueLayerColors(layerIndex, currentAnimationJSON));
 };
 
 export const changeAllColor = (
@@ -498,6 +501,7 @@ export const changeAllColor = (
         currentAnimationJSON
     );
     setAnimationJSON(updatedAnimationJSON);
+
     setColors(extractColors(getLayers(updatedAnimationJSON) as Layer[]));
     setUniqueColors(
         extractUniqueColors(getLayers(updatedAnimationJSON) as Layer[])
