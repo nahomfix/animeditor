@@ -10,9 +10,7 @@ import { ParsedColor } from "../types/colors";
 import {
     changeAllColor,
     changeColor,
-    getLayerOpacity,
     getLayerPosition,
-    getLayerRotation,
     getLayerScale,
 } from "../utils/editor";
 
@@ -22,6 +20,16 @@ export const PropertyInformation: FC = () => {
     const selectedLayerId = useEditorStore((state) => state.selectedLayerId);
     const colors = useEditorStore((state) => state.colors);
     const uniqueColors = useEditorStore((state) => state.uniqueColors);
+    const opacity = useEditorStore((state) => state.opacity);
+    const scaleX = useEditorStore((state) => state.scaleX);
+    const scaleY = useEditorStore((state) => state.scaleY);
+    const positionX = useEditorStore((state) => state.positionX);
+    const positionY = useEditorStore((state) => state.positionY);
+    const rotation = useEditorStore((state) => state.rotation);
+    const setRotation = useEditorStore((state) => state.setRotation);
+    const setScale = useEditorStore((state) => state.setScale);
+    const setPosition = useEditorStore((state) => state.setPosition);
+    const setOpacity = useEditorStore((state) => state.setOpacity);
 
     const changeOpacity = (opacity: number) => {
         const currentAnimationJSON = {
@@ -34,6 +42,7 @@ export const PropertyInformation: FC = () => {
         if (currentLayer["ks"]["o"]["a"] === 0) {
             currentLayer["ks"]["o"]["k"] = opacity;
             setAnimationJSON(currentAnimationJSON);
+            setOpacity(opacity);
         }
     };
 
@@ -48,6 +57,7 @@ export const PropertyInformation: FC = () => {
         if (currentLayer["ks"]["r"]["a"] === 0) {
             currentLayer["ks"]["r"]["k"] = rotation;
             setAnimationJSON(currentAnimationJSON);
+            setRotation(rotation);
         }
     };
 
@@ -62,6 +72,7 @@ export const PropertyInformation: FC = () => {
         if (currentLayer["ks"]["p"]["a"] === 0) {
             currentLayer["ks"]["p"]["k"] = position;
             setAnimationJSON(currentAnimationJSON);
+            setPosition(position);
         }
     };
 
@@ -76,6 +87,7 @@ export const PropertyInformation: FC = () => {
         if (currentLayer["ks"]["s"]["a"] === 0) {
             currentLayer["ks"]["s"]["k"] = scale;
             setAnimationJSON(currentAnimationJSON);
+            setScale(scale);
         }
     };
 
@@ -108,19 +120,12 @@ export const PropertyInformation: FC = () => {
                     <Stack spacing={1}>
                         <Typography variant="subtitle2">Opacity</Typography>
                         <Stack direction="row" position="relative" spacing={2}>
-                            <input
+                            <Input
                                 min={0}
                                 max={100}
                                 type="number"
-                                defaultValue={getLayerOpacity(
-                                    selectedLayerId as number,
-                                    animationJSON
-                                )}
-                                key={getLayerOpacity(
-                                    selectedLayerId as number,
-                                    animationJSON
-                                )}
-                                onBlur={(e) => {
+                                value={opacity}
+                                onChange={(e) => {
                                     const newOpacity = e.target.value;
                                     changeOpacity(Number(newOpacity));
                                 }}
@@ -131,17 +136,12 @@ export const PropertyInformation: FC = () => {
                     <Stack spacing={1}>
                         <Typography variant="subtitle2">Scale</Typography>
                         <Stack direction="row" position="relative" spacing={1}>
-                            <input
+                            <Input
                                 min={0}
                                 max={100}
                                 type="number"
-                                defaultValue={
-                                    getLayerScale(
-                                        selectedLayerId as number,
-                                        animationJSON
-                                    )[0]
-                                }
-                                onBlur={(e) => {
+                                value={scaleX}
+                                onChange={(e) => {
                                     const newScaleX = Number(e.target.value);
                                     changeScale([
                                         newScaleX,
@@ -152,17 +152,12 @@ export const PropertyInformation: FC = () => {
                                     ]);
                                 }}
                             />
-                            <input
+                            <Input
                                 min={0}
                                 max={100}
                                 type="number"
-                                defaultValue={
-                                    getLayerScale(
-                                        selectedLayerId as number,
-                                        animationJSON
-                                    )[1]
-                                }
-                                onBlur={(e) => {
+                                value={scaleY}
+                                onChange={(e) => {
                                     const newScaleY = Number(e.target.value);
                                     changeScale([
                                         newScaleY,
@@ -179,17 +174,12 @@ export const PropertyInformation: FC = () => {
                     <Stack spacing={1}>
                         <Typography variant="subtitle2">Position</Typography>
                         <Stack direction="row" position="relative" spacing={1}>
-                            <input
+                            <Input
                                 min={0}
                                 max={animationJSON.w}
                                 type="number"
-                                defaultValue={
-                                    getLayerPosition(
-                                        selectedLayerId as number,
-                                        animationJSON
-                                    )[0]
-                                }
-                                onBlur={(e) => {
+                                value={positionX}
+                                onChange={(e) => {
                                     const newPositionX = e.target.value;
                                     changePosition([
                                         Number(newPositionX),
@@ -200,17 +190,12 @@ export const PropertyInformation: FC = () => {
                                     ]);
                                 }}
                             />
-                            <input
+                            <Input
                                 min={0}
                                 max={animationJSON.h}
                                 type="number"
-                                defaultValue={
-                                    getLayerPosition(
-                                        selectedLayerId as number,
-                                        animationJSON
-                                    )[1]
-                                }
-                                onBlur={(e) => {
+                                value={positionY}
+                                onChange={(e) => {
                                     const newPositionY = e.target.value;
                                     changePosition([
                                         getLayerPosition(
@@ -227,15 +212,12 @@ export const PropertyInformation: FC = () => {
                     <Stack spacing={1}>
                         <Typography variant="subtitle2">Rotation</Typography>
                         <Stack direction="row" position="relative" spacing={2}>
-                            <input
+                            <Input
                                 min={0}
                                 max={360}
                                 type="number"
-                                defaultValue={getLayerRotation(
-                                    selectedLayerId as number,
-                                    animationJSON
-                                )}
-                                onBlur={(e) => {
+                                value={rotation}
+                                onChange={(e) => {
                                     const newOpacity = e.target.value;
                                     changeRotation(Number(newOpacity));
                                 }}
@@ -325,4 +307,8 @@ const ColorPreview = styled.div<{ color: string }>`
     border-radius: 50%;
     border: 0.5px solid gray;
     cursor: pointer;
+`;
+
+const Input = styled.input`
+    min-width: 80px;
 `;

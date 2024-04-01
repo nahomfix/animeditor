@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import { extractColors, extractUniqueColors } from "../utils/editor";
 
 interface Action {
     id: string;
@@ -20,6 +21,12 @@ interface EditorState {
     selectedLayerId: number | null;
     frames: string[];
     animationItem: any;
+    opacity: number;
+    scaleX: number;
+    scaleY: number;
+    positionX: number;
+    positionY: number;
+    rotation: number;
 }
 
 interface EditorActions {
@@ -36,6 +43,11 @@ interface EditorActions {
     setSelectedLayerId: (layerId: number) => void;
     setFrames: (frames: string[]) => void;
     setAnimationItem: (animationItem: any) => void;
+    resetSelectedLayerId: () => void;
+    setOpacity: (opacity: number) => void;
+    setScale: (scale: number[]) => void;
+    setPosition: (position: number[]) => void;
+    setRotation: (rotation: number) => void;
 }
 
 export const useEditorStore = create<EditorState & EditorActions>((set) => ({
@@ -52,6 +64,12 @@ export const useEditorStore = create<EditorState & EditorActions>((set) => ({
     selectedLayerId: null,
     frames: [],
     animationItem: null,
+    opacity: 0,
+    scaleX: 0,
+    scaleY: 0,
+    positionX: 0,
+    positionY: 0,
+    rotation: 0,
     setAnimationJSON: (animationJSON) =>
         set({
             animationJSON,
@@ -103,5 +121,29 @@ export const useEditorStore = create<EditorState & EditorActions>((set) => ({
     setAnimationItem: (animationItem: any) =>
         set({
             animationItem,
+        }),
+    resetSelectedLayerId: () =>
+        set((prevState) => ({
+            selectedLayerId: null,
+            colors: extractColors(prevState.layers),
+            uniqueColors: extractUniqueColors(prevState.layers),
+        })),
+    setOpacity: (opacity: number) =>
+        set({
+            opacity,
+        }),
+    setPosition: (position: number[]) =>
+        set({
+            positionX: position[0],
+            positionY: position[1],
+        }),
+    setScale: (scale: number[]) =>
+        set({
+            scaleX: scale[0],
+            scaleY: scale[1],
+        }),
+    setRotation: (rotation: number) =>
+        set({
+            rotation,
         }),
 }));

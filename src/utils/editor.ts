@@ -55,7 +55,9 @@ export const getDuration = (animationData: Animation) => {
 };
 
 export const getLayers = (animationData: Animation) => {
-    return animationData.layers;
+    return animationData.layers?.filter(
+        (layer) => layer.ty === LAYER_TYPE.SHAPE
+    );
 };
 
 export const reorderLayers = (
@@ -214,7 +216,7 @@ export const extractLayerColors = (layerId: number, animationData: any) => {
                                     rgba[3]
                                 );
                                 colors.push({
-                                    color: hex,
+                                    color: `#${hex}`,
                                     layerIndex: layer.ind,
                                     shapeIndex: shape.ix,
                                     itemIndex: item.ind,
@@ -277,7 +279,7 @@ export const extractUniqueLayerColors = (
                                     rgba[3]
                                 );
                                 colors.push({
-                                    color: hex,
+                                    color: `#${hex}`,
                                     layerIndex: layer.ind,
                                     shapeIndex: shape.ix,
                                     itemIndex: item.ind,
@@ -481,7 +483,6 @@ export const changeColor = (
     ];
 
     setAnimationJSON(currentAnimationJSON);
-
     setColors(extractLayerColors(layerIndex, currentAnimationJSON));
     setUniqueColors(extractUniqueLayerColors(layerIndex, currentAnimationJSON));
 };
@@ -500,8 +501,8 @@ export const changeAllColor = (
         newColor,
         currentAnimationJSON
     );
-    setAnimationJSON(updatedAnimationJSON);
 
+    setAnimationJSON(updatedAnimationJSON);
     setColors(extractColors(getLayers(updatedAnimationJSON) as Layer[]));
     setUniqueColors(
         extractUniqueColors(getLayers(updatedAnimationJSON) as Layer[])

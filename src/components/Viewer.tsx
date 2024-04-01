@@ -13,6 +13,9 @@ export const Viewer: FC = () => {
     const undos = useEditorStore((state) => state.undos);
     const redos = useEditorStore((state) => state.redos);
     const setAnimationItem = useEditorStore((state) => state.setAnimationItem);
+    const resetSelectedLayerId = useEditorStore(
+        (state) => state.resetSelectedLayerId
+    );
 
     const { View, play, pause, stop, animationItem, animationLoaded } =
         useLottie(
@@ -57,7 +60,7 @@ export const Viewer: FC = () => {
     }, [animationItem, animationLoaded, setAnimationItem]);
 
     return (
-        <Stack alignItems="center" p={6}>
+        <Stack alignItems="center" p={6} onClick={() => resetSelectedLayerId()}>
             {View}
             <Stack
                 direction="row"

@@ -2,9 +2,17 @@ import { Stack, Typography } from "@mui/material";
 import { FC } from "react";
 import TreeView, { flattenTree } from "react-accessible-treeview";
 import styled from "styled-components";
+import { LAYER_TYPE } from "../constants/layers";
 import { useEditorStore } from "../store";
 import { Layer } from "../types";
-import { extractLayerColors, extractUniqueLayerColors } from "../utils/editor";
+import {
+    extractLayerColors,
+    extractUniqueLayerColors,
+    getLayerOpacity,
+    getLayerPosition,
+    getLayerRotation,
+    getLayerScale,
+} from "../utils/editor";
 
 export const LayersPanel: FC = () => {
     const animationJSON = useEditorStore((state) => state.animationJSON);
@@ -12,15 +20,21 @@ export const LayersPanel: FC = () => {
     const setSelectedLayerId = useEditorStore(
         (state) => state.setSelectedLayerId
     );
+    const setOpacity = useEditorStore((state) => state.setOpacity);
+    const setRotation = useEditorStore((state) => state.setRotation);
+    const setPosition = useEditorStore((state) => state.setPosition);
+    const setScale = useEditorStore((state) => state.setScale);
     const setColors = useEditorStore((state) => state.setColors);
     const setUniqueColors = useEditorStore((state) => state.setUniqueColors);
 
     const layers = {
         name: "",
-        children: animationJSON.layers?.map((layer: Layer) => ({
-            id: layer.ind,
-            name: layer.nm,
-        })),
+        children: animationJSON.layers
+            ?.filter((layer: Layer) => layer.ty === LAYER_TYPE.SHAPE)
+            ?.map((layer: Layer) => ({
+                id: layer.ind,
+                name: layer.nm,
+            })),
     };
 
     const data = flattenTree(layers);
@@ -53,6 +67,27 @@ export const LayersPanel: FC = () => {
                             );
                             setUniqueColors(
                                 extractUniqueLayerColors(
+                                    Number(element.id),
+                                    animationJSON
+                                )
+                            );
+                            setOpacity(
+                                getLayerOpacity(
+                                    Number(element.id),
+                                    animationJSON
+                                )
+                            );
+                            setRotation(
+                                getLayerRotation(
+                                    Number(element.id),
+                                    animationJSON
+                                )
+                            );
+                            setScale(
+                                getLayerScale(Number(element.id), animationJSON)
+                            );
+                            setPosition(
+                                getLayerPosition(
                                     Number(element.id),
                                     animationJSON
                                 )
