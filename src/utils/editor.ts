@@ -18,6 +18,7 @@ const setFrameRate = useEditorStore.getState().setFrameRate;
 const setWidth = useEditorStore.getState().setWidth;
 const setHeight = useEditorStore.getState().setHeight;
 const setDuration = useEditorStore.getState().setDuration;
+const setTimeline = useEditorStore.getState().setTimeline;
 
 export const getBodymovinVersion = (animationData: Animation) => {
     return animationData.v || "";
@@ -341,24 +342,6 @@ export const extractAllGlobalColors = (animationData: Animation) => {
     return colors;
 };
 
-export const loadAnimation = (file: File) => {
-    const reader = new FileReader();
-    reader.onload = (event) => {
-        const newAnimation = JSON.parse(event.target?.result as string);
-        setAnimationJSON(newAnimation);
-        setLayers(getLayers(newAnimation) as Layer[]);
-        setFrameRate(getFrameRate(newAnimation));
-        setWidth(getWidth(newAnimation));
-        setHeight(getHeight(newAnimation));
-        setDuration(getDuration(newAnimation));
-        setColors(extractColors(getLayers(newAnimation) as Layer[]));
-        setUniqueColors(
-            extractUniqueColors(getLayers(newAnimation) as Layer[])
-        );
-    };
-    reader.readAsText(file);
-};
-
 export const getLayerOpacity = (layerId: number, animationJSON: Animation) => {
     const currentLayer = animationJSON.layers?.find(
         (layer) => layer.ind === layerId
@@ -582,4 +565,36 @@ export const exportFile = (width: number, height: number, frames: string[]) => {
         type: "text/html;charset=utf-8",
     });
     saveAs(file);
+};
+
+export const getLayerTimes = (animationData: Animation) => {
+    const frameRate = getFrameRate(animationData);
+    const layers = getLayers(animationData) as Layer[];
+
+    return layers.map((layer: Layer) => ({
+        name: layer.nm,
+        startTime: layer.ip / frameRate,
+        endTime: layer.op / frameRate,
+    }));
+};
+
+export const loadAnimation = (file: File) => {
+    const reader = new FileReader();
+    reader.onload = (event) => {
+        const newAnimation = JSON.parse(event.target?.result as string);
+        setAnimationJSON(newAnimation);
+        setLayers(getLayers(newAnimation) as Layer[]);
+        setFrameRate(getFrameRate(newAnimation));
+        setWidth(getWidth(newAnimation));
+        setHeight(getHeight(newAnimation));
+        setDuration(getDuration(newAnimation));
+        setColors(extractColors(getLayers(newAnimation) as Layer[]));
+        setUniqueColors(
+            extractUniqueColors(getLayers(newAnimation) as Layer[])
+        );
+
+        console.log(getLayerTimes(newAnimation));
+        setTimeline(getLayerTimes(newAnimation));
+    };
+    reader.readAsText(file);
 };

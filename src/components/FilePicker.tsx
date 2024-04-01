@@ -1,3 +1,5 @@
+import CircleIcon from "@mui/icons-material/Circle";
+import { Stack, Typography } from "@mui/material";
 import { FC, useEffect } from "react";
 import { useDropzone } from "react-dropzone";
 import styled from "styled-components";
@@ -14,6 +16,17 @@ export const FilePicker: FC = () => {
 
     return (
         <Container>
+            <Stack direction="row" alignItems="baseline" spacing={0.5}>
+                <Typography variant="h5" fontWeight={900}>
+                    Editor
+                </Typography>
+                <CircleIcon
+                    color="primary"
+                    sx={{
+                        fontSize: "10px",
+                    }}
+                />
+            </Stack>
             <Dropzone {...getRootProps()}>
                 <input {...getInputProps()} />
                 <p>Drag and drop some file here or click to select a file</p>
@@ -22,7 +35,12 @@ export const FilePicker: FC = () => {
     );
 };
 
-const Container = styled.div``;
+const Container = styled.div`
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+`;
 
 const Dropzone = styled.div`
     width: 600px;

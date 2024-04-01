@@ -27,6 +27,7 @@ interface EditorState {
     positionX: number;
     positionY: number;
     rotation: number;
+    timeline: any[];
 }
 
 interface EditorActions {
@@ -48,6 +49,7 @@ interface EditorActions {
     setScale: (scale: number[]) => void;
     setPosition: (position: number[]) => void;
     setRotation: (rotation: number) => void;
+    setTimeline: (timeline: any[]) => void;
 }
 
 export const useEditorStore = create<EditorState & EditorActions>((set) => ({
@@ -70,6 +72,7 @@ export const useEditorStore = create<EditorState & EditorActions>((set) => ({
     positionX: 0,
     positionY: 0,
     rotation: 0,
+    timeline: [],
     setAnimationJSON: (animationJSON) =>
         set({
             animationJSON,
@@ -145,5 +148,9 @@ export const useEditorStore = create<EditorState & EditorActions>((set) => ({
     setRotation: (rotation: number) =>
         set({
             rotation,
+        }),
+    setTimeline: (timeline: any[]) =>
+        set({
+            timeline,
         }),
 }));
