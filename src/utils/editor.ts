@@ -19,6 +19,7 @@ const setWidth = useEditorStore.getState().setWidth;
 const setHeight = useEditorStore.getState().setHeight;
 const setDuration = useEditorStore.getState().setDuration;
 const setTimeline = useEditorStore.getState().setTimeline;
+const addLayerAnimation = useEditorStore.getState().addLayerAnimation;
 
 export const getBodymovinVersion = (animationData: Animation) => {
     return animationData.v || "";
@@ -508,6 +509,22 @@ export const captureFrames = (animationItem: any, callback: any) => {
     return frames;
 };
 
+// export const captureLayerFrames = (totalFrames: number, animationItem: any, callback: any) => {
+//     const frames: string[][] = [];
+
+//     const canvas = document.querySelector(
+//         ".lottie-animation-canvas"
+//     ) as HTMLCanvasElement;
+
+//     for (let i = 0; i < totalFrames; i++) {
+//         animationItem.goToAndStop(i, true);
+//         const dataURL = canvas?.toDataURL();
+//         callback(dataURL);
+//     }
+
+//     return frames;
+// };
+
 export const exportFile = (width: number, height: number, frames: string[]) => {
     const htmlTemplate = `
     <!DOCTYPE html>
@@ -582,6 +599,18 @@ export const loadAnimation = (file: File) => {
     const reader = new FileReader();
     reader.onload = (event) => {
         const newAnimation = JSON.parse(event.target?.result as string);
+
+        const layers = newAnimation.layers;
+
+        for (const layer of layers) {
+            const layerAnimation = {
+                ...newAnimation,
+                layers: [layer],
+            };
+
+            addLayerAnimation(layerAnimation);
+        }
+
         setAnimationJSON(newAnimation);
         setLayers(getLayers(newAnimation) as Layer[]);
         setFrameRate(getFrameRate(newAnimation));
@@ -592,8 +621,6 @@ export const loadAnimation = (file: File) => {
         setUniqueColors(
             extractUniqueColors(getLayers(newAnimation) as Layer[])
         );
-
-        console.log(getLayerTimes(newAnimation));
         setTimeline(getLayerTimes(newAnimation));
     };
     reader.readAsText(file);
