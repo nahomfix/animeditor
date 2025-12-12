@@ -21,6 +21,7 @@ function App() {
     return (
         <Layout>
             <Viewer />
+            {/* <Canvas /> */}
         </Layout>
     );
 }
